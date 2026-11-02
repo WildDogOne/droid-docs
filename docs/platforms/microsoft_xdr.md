@@ -157,7 +157,7 @@ customer_filters_directory = "filters/zoidberg/"
 | disabled       | true/false | Set to true if you want to disable the rule                                                   |
 | removed        | true/false | Set to true if you want to delete the rule                                                    |
 | action         | list       | The actions that should be performed on rule trigger, see action section for more information |
-| impactedAssets | list       | The impactedAssets are needed for Asset mapping to the alerts. Defaults to Device = deviceId  |
+| entity_mappings | list      | Configure the entity mappings of the resulting alerts, see entity mappings section for more information |
 
 ### Action
 
@@ -210,32 +210,67 @@ custom:
 ```
 
 
-### Impacted Assets
+### Entity Mappings
 
-When deploying raw, the custom field `impactedAssets` is required for the asset mapping in the resulting alerts.
+Entity mappings define which columns of your detection query are attached to the
+resulting alert as entities (hosts, accounts, mailboxes, files, ...).
 
-???+ note
-
-    The default value is currently `deviceId` but it might not always work depending on your KQL. As for the Sigma rules, if you make the use of `| project` for instance, make sure to output `DeviceId`.
-
-| Impacted Asset Type | Identifier (Allowed Values)                                                                                                         |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Device              | deviceId, deviceName                                                                                                                |
-| Mailbox             | accountUpn, initiatingProcessAccountUpn                                                                                             |
-| User                | accountObjectId, accountSid, accountUpn, accountName, accountDomain, accountId, requestAccountSid, requestAccountName, requestAccountDomain, recipientObjectId, processAccountObjectId, initiatingAccountSid, initiatingProcessAccountUpn, initiatingAccountName, initiatingAccountDomain, servicePrincipalId, servicePrincipalName, targetAccountUpn |
+Use the following example to configure the entity mappings in a Sigma rule:
 
 ```yaml
 custom:
-    # ...
-    impactedAssets:
-    - impactedAssetType: Device
-        identifier: deviceId #deviceId, deviceName
-    - impactedAssetType: Mailbox
-        identifier: initiatingProcessAccountUpn 
-    - impactedAssetType: User
-        identifier: initiatingProcessAccountUpn
+  # ...
+  entity_mappings:
+    - entity_type: hosts
+      field_mappings:
+        - identifier: deviceIdColumn
+          column_name: DeviceId
+    - entity_type: accounts
+      field_mappings:
+        - identifier: upnColumn
+          column_name: InitiatingProcessAccountUpn
+    - entity_type: mailboxes
+      field_mappings:
+        - identifier: primaryAddressColumn
+          column_name: InitiatingProcessAccountUpn
+    - entity_type: files
+      field_mappings:
+        - identifier: sha256Column
+          column_name: InitiatingProcessSHA256
 ```
+
+The `identifier` must be one of the following values for the given entity type,
+the `column_name` is a column of your detection query result:
+
+| Entity Type        | Identifier (Allowed Values)                                              |
+| ------------------ | -------------------------------------------------------------------------- |
+| accounts           | aadUserIdColumn, dnsDomainColumn, nameColumn, ntDomainColumn, sidColumn, upnColumn, upnSuffixColumn |
+| amazonResources    | amazonResourceIdColumn                                                     |
+| azureResources     | resourceIdColumn                                                           |
+| cloudApplications  | appIdColumn, nameColumn                                                    |
+| dns                | domainNameColumn, hostIpAddressColumn, serverIpColumn                      |
+| files              | nameColumn, sha1Column, sha256Column                                       |
+| googleCloudResources | fullResourceNameColumn                                                   |
+| hosts              | deviceIdColumn, dnsDomainColumn, nameColumn, netBiosNameColumn, ntDomainColumn |
+| ips                | addressColumn, scopeColumn                                                 |
+| mailboxes          | primaryAddressColumn                                                       |
+| mailClusters       | queryColumn, sourceColumn                                                  |
+| mailMessages       | networkMessageIdColumn, recipientColumn, senderColumn, subjectColumn       |
+| oAuthApplications  | oAuthAppIdColumn                                                           |
+| processes          | sha1Column, sha256Column                                                   |
+| registryValues     | keyColumn, valueNameColumn                                                 |
+| securityGroups     | distinguishedNameColumn, objectIdColumn, sidColumn                         |
+| urls               | addressColumn                                                              |
+
+???+ note
+
+    Entity mappings are optional. If you do not define them, the Microsoft XDR
+    service auto-derives the entity mappings from your query columns. Define
+    them explicitly when the auto-derivation does not produce the entities you
+    want on the alert.
 
 ???+ warning
 
-    Failing to provide this field will result in non-working detection rules on the platform. We advise to introduce some validation check in your CI/CD process for the Microsoft XDR raw rules.
+    The former `impactedAssets` custom field (and the `impactedAssets` property
+    in raw rules) is deprecated by Microsoft in favour of entity mappings and
+    is no longer pushed by droid. Migrate existing rules to `entity_mappings`.
