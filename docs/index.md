@@ -3,46 +3,45 @@ hide:
   - navigation
 ---
 
-# droid documentation
+# droid
 
-`droid` is a PySigma wrapper allowing an easy adoption of [Sigma](https://sigmahq.io/) and helps enabling Detection-As-Code. The ultimate goal of `droid` is to consume a repository Sigma rules and deploy them on one or multiple platform (SIEM/EDR).
+`droid` enables **Detection as Code using [Sigma](https://sigmahq.io/)**. Keep your detection rules as Sigma in a Git repository, and `droid` validates them, converts them for each of your platforms, searches your logs with them and deploys them to your SIEM and EDR, from your laptop or your CI/CD pipeline.
 
-The tool also supports native SIEM/EDR search queries.
+Built on [pySigma](https://github.com/SigmaHQ/pySigma), `droid` also handles rules written directly in a platform's query language, the [raw rules](./raw_rules.md).
 
 ![droid workflow](./resources/droid_workflow.png)
 
 <div class="grid cards" markdown>
 
--   :material-clock-fast:{ .lg .middle } __Set up in few minutes__
+-   :material-clock-fast:{ .lg .middle } __Set up in minutes__
 
     ---
 
-    Install [`detect-droid`](/droid-docs/getting-started/#installation) with [`pip`](https://pypi.org/project/detect-droid/) and get up
-    and running in minutes
+    Install [`detect-droid`](https://pypi.org/project/detect-droid/) with `pip`, add the pySigma backends of your platforms, and convert your first rules.
 
     [:octicons-arrow-right-24: Getting started](./getting-started.md)
 
--   :fontawesome-solid-gears:{ .lg .middle } __Enable automation__
+-   :material-source-branch:{ .lg .middle } __Detection as Code__
 
     ---
 
-    Enable detection content versioning and take advantage of Sigma at scale
+    Review, version and roll back your detection rules like code, and let your CI/CD pipeline test and deploy them.
 
-    [:octicons-arrow-right-24: Sigma Unleashed: A Realistic Implementation](https://www.first.org/resources/papers/conf2024/1315-1350-Sigma-Unleashed-Mathieu-Le-Cleach.pdf)
+    [:octicons-arrow-right-24: Usage](./usage.md)
 
 -   :simple-toml:{ .lg .middle } __Made to measure__
 
     ---
 
-    Standardise the detection rules on your platforms, change the rules settings and more with few lines
+    Map each log source to your data with its own pipelines, and tune schedules, suppression and actions per platform, log source or rule.
 
-    [:octicons-arrow-right-24: Configuration](/droid-docs/configuration/)
+    [:octicons-arrow-right-24: Configuration](./configuration.md)
 
--   :material-scale-balance:{ .lg .middle } __Open Source, EUPL__
+-   :material-scale-balance:{ .lg .middle } __Open source, EUPL__
 
     ---
 
-    droid is licensed under the EUPL and available on [GitHub](https://github.com/certeu/droid)
+    `droid` is licensed under the EUPL and developed in the open on [GitHub](https://github.com/certeu/droid).
 
     [:octicons-arrow-right-24: License](https://github.com/certeu/droid/blob/main/LICENSE)
 
@@ -50,19 +49,41 @@ The tool also supports native SIEM/EDR search queries.
 
 ## Features
 
-Key features are:
+- **Validate** the syntax and the quality of your Sigma rules with the pySigma validators
+- **Convert** them for each platform, with the pipelines you set per log source
+- **Search** your logs with them, and report the hits before going live
+- **Export** them to your platforms: create, update, disable and remove detection rules
+- **Check the integrity** of what runs on a platform against your repository
+- **Correlate** with Sigma correlation rules
+- **Serve one log source from several telemetry sources**, each converted with its own pipelines, see [Log source variants](./log_source_variants.md)
+- **Manage several tenants** (MSSP) with per customer filters
+- **Update** your rules from upstream sources such as SigmaHQ
 
-1. **Validate** the syntax of Sigma rules
-2. **Convert** them by applying a set of transforms per log source and platform
-3. **Search** in logs and report on findings
-4. **Test** the rules by leveraging Atomic Red Team™ (work in progress)
-5. **Deploy** them with any compatible SIEM and EDR
+## Supported platforms
 
-[droid]: https://github.com/certeu/droid
-
-## Supported SIEM/EDR
-
+| Platform | `--platform` | Search | Export | Integrity | Rule actions | MSSP |
+| --- | --- | :---: | :---: | :---: | --- | :---: |
+| [Splunk](./platforms/splunk.md) | `splunk` | ✅ | ✅ | ✅ | Email, webhook | |
+| [Microsoft Sentinel](./platforms/microsoft_sentinel.md) | `microsoft_sentinel` | ✅ | ✅ | ✅ | | ✅ |
+| [Microsoft Defender XDR](./platforms/microsoft_xdr.md) | `microsoft_xdr` | ✅ | ✅ | ✅ | Response actions on users, files and devices | ✅ |
+| [Elastic Security](./platforms/elastic_security.md) (ES\|QL) | `esql` | ✅ | ✅ | ✅ | Index, server log, email, webhook | |
+| [Elastic Security](./platforms/elastic_security.md) (EQL) | `eql` | ✅ | ✅ | ✅ | Index, server log, email, webhook | |
 
 ???+ info
 
-    See the list of supported platforms (SIEM/EDR) [here](./platforms/index.md).
+    Each platform needs its pySigma backend, see [Getting started](./getting-started.md). Your platform is missing? [Contributions](https://github.com/certeu/droid/blob/main/CONTRIBUTE.md) are welcome.
+
+## At a glance
+
+```sh
+droid rules validate  -r sigma-rules/ -c droid_config.toml              # check your rules
+droid rules convert   -r sigma-rules/ -c droid_config.toml -p splunk    # see the queries they become
+droid rules search    -r sigma-rules/ -c droid_config.toml -p splunk    # search your logs with them
+droid rules export    -r sigma-rules/ -c droid_config.toml -p splunk    # deploy them
+droid rules integrity -r sigma-rules/ -c droid_config.toml -p splunk    # check what runs on the platform
+```
+
+## Resources
+
+- [Sigma Unleashed: A Realistic Implementation](https://www.first.org/resources/papers/conf2024/1315-1350-Sigma-Unleashed-Mathieu-Le-Cleach.pdf), FIRST 2024
+- [droid-init](https://github.com/certeu/droid-init), a repository to start your detection rules from

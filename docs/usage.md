@@ -112,12 +112,6 @@ Example:
 
 Customers do not always carry the same telemetry. When a log source is served by several sources, the `variants` key of an `export_list_mssp` entry selects the ones a given customer has, so they only receive the queries their data can answer. See [log source variants](./log_source_variants.md#per-customer-telemetry).
 
-## Test using Atomic Red Team
-
-???+ example
-
-    This feature is under development, stay tuned!
-
 ## Export
 
 ???+ info

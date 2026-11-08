@@ -1,7 +1,7 @@
 site_name: droid
 site_url: https://certeu.github.io/droid-docs/
 site_description: >-
-  droid is a PySigma wrapper allowing an easy adoption of Sigma and helps enabling Detection-As-Code.
+  droid enables Detection as Code using Sigma: validate, convert, search and deploy your Sigma rules to your SIEM and EDR.
 theme:
   logo: _static/favicon.ico
   favicon: _static/favicon.ico

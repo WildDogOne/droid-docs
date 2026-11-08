@@ -38,13 +38,17 @@ If you already have a repository containing all your Sigma rules or if you wish 
 [category]: https://sigmahq.io/docs/basics/rules.html#logsources
 [output formats]: https://sigmahq.io/docs/digging-deeper/backends.html#output-formats
 
-For instance, if you intend to use the following backends:
+Install the backend of each platform you target, in these versions:
 
 ```bash
-pip install pysigma-backend-splunk
-pip install pysigma-backend-kusto
-pip install pySigma-backend-elasticsearch
+pip install pysigma-backend-splunk==2.1.0          # Splunk
+pip install pysigma-backend-kusto==1.0.1           # Microsoft Sentinel and Defender XDR
+pip install pysigma-backend-elasticsearch==2.1.1   # Elastic Security
 ```
+
+???+ warning
+
+    Keep these versions: they support the pySigma version droid relies on. The latest releases of some backends require a newer pySigma and upgrade it, which breaks the other backends.
 
 ???+ note
 
